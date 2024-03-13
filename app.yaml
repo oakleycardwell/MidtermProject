@@ -1,6 +1,0 @@
-runtime: php74 # specify your PHP version
-env_variables:
-  DB_HOST: "34.133.234.4"
-  DB_NAME: "quotesdb"
-  DB_USER: "postgres"
-  DB_PASSWORD: "]Q%\"6nPKEIje:>[^"
