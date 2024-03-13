@@ -1,6 +1,7 @@
 <?php
 
 namespace api\config;
+use http\Exception;
 use PDO;
 use PDOException;
 
@@ -14,12 +15,14 @@ class Database
 
     public function getConnection()
     {
+        ini_set('error_log', 'C:\Users\oakle\OneDrive\Desktop\Spring 2024\Backend Dev\MidtermProject\error.log');
         $dsn = "pgsql:host=" . $this->host . ";port=5432;dbname=" . $this->db . ";user=" . $this->username . ";password=" . $this->password;
         try {
-            $pdo = new PDO($dsn, $this->username, $this->password);
+            return new PDO($dsn, $this->username, $this->password);
         } catch (PDOException $e) {
             error_log($e->getMessage());
+            // Return false or null if the connection could not be established
+            return false;
         }
-        return $pdo;
     }
 }
