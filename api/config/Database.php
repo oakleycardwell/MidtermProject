@@ -7,10 +7,10 @@ use PDOException;
 
 class Database
 {
-    private $host = "34.133.234.4";
-    private $db = "quotesdb";
-    private $username = "postgres";
-    private $password = "]Q%\"6nPKEIje:>[^";
+    private $host = getenv('DB_HOST');
+    private $db = getenv('DB_NAME');
+    private $username = getenv('DB_USER');
+    private $password = getenv('DB_PASSWORD');
 
 
     public function getConnection()
