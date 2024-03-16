@@ -25,4 +25,3 @@ if($category->category!=null) {
     // tell the user category does not exist
     echo json_encode(array("message" => "Category does not exist."));
 }
-?>

@@ -10,11 +10,17 @@ if (!empty($data->category)) {
 
     // create the category
     if($category->create()) {
+        // Prepare the response data
+        $newCategory = array(
+            'id' => $category->id,
+            'category' => $category->category,
+        );
+
         // set response code - 201 created
         http_response_code(201);
 
-        // tell the user
-        echo json_encode(array("message" => "Category was created."));
+        // return the newly created category
+        echo json_encode($newCategory);
     } else {
         // if unable to create the category, tell the user
         // set response code - 503 service unavailable
@@ -26,9 +32,8 @@ if (!empty($data->category)) {
 } else {
     // tell the user data is incomplete
     // set response code - 400 bad request
-    http_response_code(400);
+    http_response_code(200);
 
     // tell the user
-    echo json_encode(array("message" => "Unable to create category. Data is incomplete."));
+    echo json_encode(array("message" => "Missing Required Parameters"));
 }
-?>

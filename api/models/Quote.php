@@ -51,7 +51,7 @@ class Quote
     {
         // Create query
         $query = "SELECT
-                q.id, q.quote, q.author_id, q.category_id, a.author, c.category
+                q.id, q.quote, a.author, c.category
               FROM
                 " . $this->table_name . " q
                 LEFT JOIN
@@ -73,40 +73,52 @@ class Quote
 
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Set properties
+        // Check if any quote was found
         if ($row) {
+            // Set properties
             $this->quote = $row['quote'];
-            $this->author_id = $row['author_id'];
-            $this->category_id = $row['category_id'];
             $this->author = $row['author'];
             $this->category = $row['category'];
-            return true;
+
+            // Return the quote data as an associative array
+            return array(
+                "id" => $this->id,
+                "quote" => $this->quote,
+                "author" => $this->author,
+                "category" => $this->category
+            );
         }
 
         return false;
     }
 
     // CREATE a quote
-    public function create()
-    {
-        // Create query
-        $query = "INSERT INTO " . $this->table_name . " (quote, author_id, category_id) VALUES (:quote, :author_id, :category_id)";
+    public function create() {
+        // Check if author_id exists
+        if (!$this->authorExists($this->author_id)) {
+            return 'author_not_found';
+        }
+
+        // Check if category_id exists
+        if (!$this->categoryExists($this->category_id)) {
+            return 'category_not_found';
+        }
+
+        // Your existing SQL insert logic here
+        $query = "INSERT INTO quotes (quote, author_id, category_id) VALUES (?, ?, ?)";
 
         // Prepare statement
         $stmt = $this->conn->prepare($query);
 
-        // Clean data
-        $this->quote = htmlspecialchars(strip_tags($this->quote));
-        $this->author_id = htmlspecialchars(strip_tags($this->author_id));
-        $this->category_id = htmlspecialchars(strip_tags($this->category_id));
-
-        // Bind data
-        $stmt->bindParam(':quote', $this->quote);
-        $stmt->bindParam(':author_id', $this->author_id);
-        $stmt->bindParam(':category_id', $this->category_id);
+        // Bind values
+        $stmt->bindParam(1, $this->quote);
+        $stmt->bindParam(2, $this->author_id);
+        $stmt->bindParam(3, $this->category_id);
 
         // Execute query
         if ($stmt->execute()) {
+            // Return true and fetch the last inserted ID
+            $this->id = $this->conn->lastInsertId();
             return true;
         }
 
@@ -144,6 +156,7 @@ class Quote
             return true;
         }
 
+        error_log("SQL Error: " . print_r($stmt->errorInfo(), true));
         return false;
     }
 
@@ -168,6 +181,48 @@ class Quote
         }
 
         return false;
+    }
+
+    // Helper method for checking existence of author by ID
+    public function authorExists($author_id) {
+        $query = "SELECT id FROM authors WHERE id = :author_id LIMIT 1";
+
+        // Prepare statement
+        $stmt = $this->conn->prepare($query);
+
+        // Bind the author_id
+        $stmt->bindParam(':author_id', $author_id);
+
+        // Execute query
+        $stmt->execute();
+
+        // Check if any row was returned
+        if ($stmt->rowCount() > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    // Helper method for checking existence of category by ID
+    public function categoryExists($category_id) {
+        $query = "SELECT id FROM categories WHERE id = :category_id LIMIT 1";
+
+        // Prepare statement
+        $stmt = $this->conn->prepare($query);
+
+        // Bind the category_id
+        $stmt->bindParam(':category_id', $category_id);
+
+        // Execute query
+        $stmt->execute();
+
+        // Check if any row was returned
+        if ($stmt->rowCount() > 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
 

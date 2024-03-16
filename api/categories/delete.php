@@ -10,8 +10,12 @@ if($category->delete()) {
     // set response code - 200 ok
     http_response_code(200);
 
+    $quote_item=array(
+        "id" => $category -> id,
+    );
+
     // tell the user
-    echo json_encode(array("message" => "Category was deleted."));
+    echo json_encode($quote_item);
 } else {
     // if unable to delete the category, tell the user
     // set response code - 503 service unavailable

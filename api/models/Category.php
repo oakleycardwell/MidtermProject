@@ -73,6 +73,8 @@ class Category {
 
         // Execute query
         if ($stmt->execute()) {
+            // Fetch the last inserted ID and set it to the id property
+            $this->id = $this->conn->lastInsertId();
             return true;
         }
 

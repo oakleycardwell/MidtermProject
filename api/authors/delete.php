@@ -9,9 +9,13 @@ if(!empty($data->id)) {
 
     // Delete the author
     if($author->delete()) {
+        $quote_item=array(
+            "id" => $author -> id,
+        );
+
         // Set response code - 200 OK
         http_response_code(200);
-        echo json_encode(array('message' => 'Author Deleted'));
+        echo json_encode($quote_item);
     } else {
         // Set response code - 503 Service Unavailable
         http_response_code(503);

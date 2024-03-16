@@ -13,8 +13,7 @@ if($num>0) {
     // retrieve our table contents
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         // extract row
-        // this will make $row['name'] to
-        // just $name only
+        // this will make $row['name'] to just $name only
         extract($row);
 
         $category_item=array(
@@ -30,7 +29,5 @@ if($num>0) {
 
     // show categories data in json format
     echo json_encode($categories_arr);
-} else {
-    // no categories found will be here
 }
-?>
+

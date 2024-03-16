@@ -61,8 +61,7 @@ class Author {
     }
 
     //CREATE an author
-    public function create()
-    {
+    public function create() {
         // Create query
         $query = "INSERT INTO " . $this->table_name . " (author) VALUES (:author)";
 
@@ -77,6 +76,8 @@ class Author {
 
         // Execute query
         if ($stmt->execute()) {
+            // Fetch the last inserted ID
+            $this->id = $this->conn->lastInsertId();
             return true;
         }
 

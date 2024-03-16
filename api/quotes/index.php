@@ -1,5 +1,5 @@
 <?php
-// Example index.php for the quotes endpoint
+// index.php for the quotes endpoint
 
 // Include your autoloader and any necessary configuration files
 use api\config\Database;
@@ -7,10 +7,21 @@ use api\models\Quote;
 use api\models\Author;
 use api\models\Category;
 
-require_once '../config/Database.php';
-require_once '../models/Quote.php';
-require_once '../models/Author.php';
-require_once '../models/Category.php';
+require_once __DIR__ . '/../config/Database.php';
+require_once __DIR__ . '/../models/Quote.php';
+require_once __DIR__ . '/../models/Author.php';
+require_once __DIR__ . '/../models/Category.php';
+
+// Set Content-Type header to application/json and allow CORS
+header('Access-Control-Allow-Origin: *');
+header('Content-Type: application/json');
+$request_method = $_SERVER['REQUEST_METHOD'];
+
+if ($request_method === 'OPTIONS') {
+    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
+    header('Access-Control-Allow-Headers: Origin, Accept, Content-Type, X-Requested-With');
+    exit();
+}
 
 // Connect to the database
 $database = new Database();
@@ -27,80 +38,48 @@ $quote = new Quote($db);
 $author = new Author($db);
 $category = new Category($db);
 
-// Get the request method
-$request_method = $_SERVER['REQUEST_METHOD'];
-
 // Handle the request based on the method
 switch ($request_method) {
     case 'GET':
+        // Check if an 'id' is provided
         if (isset($_GET['id'])) {
-            // Handle the request for a single quote
             $quote->id = $_GET['id'];
-            if ($quote->read_single()) {
-                // Quote exists
-                $author->id = $quote->author_id;
-                $author->read_single();
+            $quote_item = $quote->read_single();
 
-                $category->id = $quote->category_id;
-                $category->read_single();
-
-                $quote_arr = array(
-                    'id' => $quote->id,
-                    'quote' => $quote->quote,
-                    'author' => $author->author,
-                    'category' => $category->category
-                );
-
-                // Set response code - 200 OK
+            if ($quote_item) {
+                // Successfully found the quote, return it as a JSON object
                 http_response_code(200);
-
-                // Make it json format
-                echo json_encode($quote_arr);
+                echo json_encode($quote_item);
             } else {
-                // No quote found
-                http_response_code(404);
-                echo json_encode(array('message' => 'No Quote Found'));
+                // No quote found with the provided ID
+                http_response_code(200);
+                echo json_encode(['message' => 'No Quotes Found']);
             }
         } else {
-            // Get all quotes
+            // Fetch all quotes if no 'id' parameter
             $stmt = $quote->read();
             $num = $stmt->rowCount();
 
-            // Check if any quotes
             if ($num > 0) {
-                // Quotes array
                 $quotes_arr = array();
-                $quotes_arr['data'] = array();
 
-                // Retrieve our table contents
                 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                    // Remove the extract($row);
-
-                    $author->id = $row['author_id'];
-                    $author->read_single();
-
-                    $category->id = $row['category_id'];
-                    $category->read_single();
-
+                    // Extract the author and category names directly, avoiding including author_id and category_id
                     $quote_item = array(
                         'id' => $row['id'],
                         'quote' => $row['quote'],
-                        'author' => $author->author,
-                        'category' => $category->category
+                        'author' => $row['author'], // Use the author name from the JOIN
+                        'category' => $row['category'] // Use the category name from the JOIN
                     );
 
-                    array_push($quotes_arr['data'], $quote_item);
+                    array_push($quotes_arr, $quote_item);
                 }
 
-                // Set response code - 200 OK
                 http_response_code(200);
-
-                // Show quotes data in json format
                 echo json_encode($quotes_arr);
             } else {
-                // No quotes found
-                http_response_code(404);
-                echo json_encode(array('message' => 'No quotes found.'));
+                http_response_code(200);
+                echo json_encode(['message' => 'No Quotes Found']);
             }
         }
         break;
