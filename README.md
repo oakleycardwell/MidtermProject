@@ -1,4 +1,4 @@
-# Project Name
+# INF 653 Midterm Project
 
 ## Overview
 
